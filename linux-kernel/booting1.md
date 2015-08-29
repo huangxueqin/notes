@@ -51,10 +51,10 @@ For modern segment register is large enough, disable the segmentation phase. so 
 4. register cr0's 0-bit controlls the switch between Real mode and Protected mode.
 
 5. for more information, refer to the following links:
-*http://geezer.osdevbrasil.net/johnfine/segments.htm*
-*http://duartes.org/gustavo/blog/post/memory-translation-and-segmentation/*
-*http://www.sudleyplace.com/pmtorm.html*
-*https://en.wikipedia.org/wiki/X86_memory_segmentation*
+*http://geezer.osdevbrasil.net/johnfine/segments.htm*  
+*http://duartes.org/gustavo/blog/post/memory-translation-and-segmentation/*  
+*http://www.sudleyplace.com/pmtorm.html*  
+*https://en.wikipedia.org/wiki/X86_memory_segmentation*  
 
 6. When switching between real mode and protected mode, since the paging configuration is the same and also, the physical
 address is the same too. So is this mean that the linear address between the real and protected mode is the same? And the
