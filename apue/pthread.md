@@ -62,3 +62,4 @@
         // another reason is to prevent signal happens between while
         // directive's condition judge and call to pthread_cond_wait, such
         // race condition will make the signal miss.
+- pthread_spin_lock 自旋锁，在进入阻塞队列之前先跑几个循环，然后再去尝试获取锁，直到自旋的次数超过阈值，才进入阻塞队列，此时才切换状态
