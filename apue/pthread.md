@@ -6,24 +6,30 @@
 
 ###pthread
 - create a pthread, put tid into tidp
+
         int pthread_create(pthread_t *restrict tidp,
             const pthread_attr_t *restrict attr,
             void *(*start_rtn)(void *), void *restrict arg);
 - thread terminates itself  
+
         void pthread_exit(void *rval_ptr);
 
 - another thread in process wait for thread with tid "thread" terminate, and acquire terminating state
+
         void pthread_join(pthread_t thread, void **rval_ptr);
 
 - just like exit system call, we can use a pair of functions to register and run cleanup functions
+
         void pthread_cleanup_push(void (*rtn)(void *), void *arg);
         void pthread_cleanup_pop(int execute);
 - mutex
+
         pthread_mutex_init
         pthread_mutex_destroy
         pthread_mutex_lock | pthread_mutex_trylock
         pthread_mutex_unlock
 - rwlock rwlock has three mode: lock in read mode, lock in write mode, unlock. Only one thread can possesses write lock, however read lock can possessed by multi threads.
+
         pthread_rwlock_init
         pthread_rwlock_destroy
         pthread_rwlock_rdlock | pthread_rwlock_tryrdlock
@@ -31,6 +37,7 @@
         pthread_rwlock_unlock
 
 - condition
+
         pthread_cond_init
         pthread_cond_destroy
 
