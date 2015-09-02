@@ -109,32 +109,79 @@
                     handlerMessage(msg);
                 }
             }
-            
+
 7. Android下结束进程的方法
-finish方法
-android.os.Process.killProcess(android.os.Process.myPid()) 对于非root用户，该方法只能杀掉同一个包中的进程和由这个app创造的进程。
-void killBackgroundProcesses(string packageName)
-8 Intent 的Flag
-9. Android View的绘制过程
-第一步：当activity启动的时候，触发初始化view过程的是由Window对象的DecorView调用View（具体怎样从xml中读取是用LayoutInflater.from(context).inflate）对象的public final void measure(int widthMeasureSpec, int heightMeasureSpec)方法开始的，这个方法是final类型的，也就是所有的子类都不能继承该方法，保证android初始化view的原理不变。具体参数类值，后面会介绍。
-第二步：View的measure方法 onMeasure(widthMeasureSpec, heightMeasureSpec)，该方法进行实质性的view大小计算。注意：view的大小是有父view和自己的大小决定的，而不是单一决定的。这也就是为什么ViewGroup的子类会重新该方法，比如LinearLayout等。因为他们要计算自己和子view的大小。View基类有自己的实现，只是设置大小。其实根据源码来看，measure的过程本质上就是把Match_parent和wrap_content转换为实际大小
-第三步：当measure结束时，回到DecorView，计算大小计算好了，那么就开始布局了，开始调用view的 public final void layout(int l, int t, int r, int b)，该还是也是final类型的，目的和measure方法一样。layout方法内部会调用onlayout(int l, int t, int r, int b )方法，二ViewGroup将此方法abstract的了，所以我们继承ViewGroup的时候，需要重新该方法。该方法的本质是通过measure计算好的大小，计算出view在屏幕上的坐标点
-第四步：measure过了，layout过了，那么就要开始绘制到屏幕上了，所以开始调用view的  public void draw(Canvas canvas)方法，此时方法不是final了，原因是程序员可以自己画，内部会调用ondraw，我们经常需要重写的方法。 简单描述可以解释为：计算大小（measure），布局坐标计算（layout），绘制到屏幕（draw）；
-10. View，SurfaceView和GLSurfaceView的区别
-view是最基础的，必须在UI主线程内更新画面，速度较慢。
-SurfaceView 是view的子类，类似使用双缓机制，在新的线程中更新画面所以刷新界面速度比view快
-GLSurfaceView 是SurfaceView的子类，opengl 专用的
+    - android.os.Process.killProcess(android.os.Process.myPid()) 对于非root用户，该方法只能杀掉同一个包中的进程和由这个app创造的进程。
+    - void killBackgroundProcesses(string packageName)
+
+8. Intent 的Flag
+
+9. Android View的绘制过程(注意区分measure和onMeasure，layout和onLayout，draw和onDraw的关系)  
+**第一步**：当activity启动的时候，触发初始化view过程的是由Window对象的DecorView调用View（具体怎样从xml中读取是用LayoutInflater.from(context).inflate）
+对象的`public final void measure(int widthMeasureSpec, int heightMeasureSpec)`方法开始的，这个方法是final类型的，也就是所有的子类都不能继承该方法，
+保证android初始化view的原理不变。具体参数类值，后面会介绍。  
+**第二步**：View的measure方法`onMeasure(widthMeasureSpec,heightMeasureSpec)`，该方法进行实质性的view大小计算。注意：view的大小是有父view和自己的大小决定的，
+而不是单一决定的。这也就是为什么ViewGroup的子类会重新该方法，比如LinearLayout等。因为他们要计算自己和子view的大小。View基类有自己的实现，只是设置大小。其实根
+据源码来看，measure的过程本质上就是把Match_parent和wrap_content转换为实际大小.  
+**第三步**：当measure结束时，回到DecorView，计算大小计算好了，那么就开始布局了，开始调用view的`public final void layout(int l, int t, int r, int b)，`该也是
+final类型的，目的和measure方法一样。layout方法内部会调用`onlayout(int l, int t, int r, int b )`方法，ViewGroup将此方法abstract的了，所以我们继承ViewGroup
+的时候,需要重新该方法。该方法的本质是通过measure计算好的大小，计算出view在屏幕上的坐标点。  
+第四步：measure过了，layout过了，那么就要开始绘制到屏幕上了，所以开始调用view的`public void draw(Canvas canvas)`方法，此时方法不是final了，原因是程序员可以自
+己画，内部会调用ondraw，我们经常需要重写的方法。 简单描述可以解释为：计算大小（measure），布局坐标计算（layout），绘制到屏幕（draw）；
+
+10. View，SurfaceView和GLSurfaceView的区别  
+    - 双缓冲：当一个动画争先显示时，程序又在改变它，前面还没显示完，程序又请求重新绘制，屏幕就会不停闪烁。为了避免闪烁，可以使用双缓冲技术，将要处理的图片在内存中处理好
+    之后，再将其显示到屏幕上。这样显示出来是完整的图象，不会出现闪烁现象。双缓冲机制就是在内存中创建一片内存区域，把将要绘制的图片预先绘制到内存中，在绘制显示的时候直接
+    获取缓冲区的图片进行绘制。更具体一点来说：先通过setBitmap方法将要绘制的所有的图形绘制到一个Bitmap上也就是先在内存空间完成，然后再来调用drawBitmap方法绘制出这个
+    Bitmap，显示在屏幕上。优点是不会出现闪烁，并且十分高效，缺点是当图片很大时会爆内存。
+
+            // 实现双缓冲的方法是使用一个缓冲画布，将内容绘制在缓冲区BufferBitmap中，然后一次性的将mBufferBitmap绘制在屏幕上。
+            // 一般我们为绘制缓冲区新开一个线程，然后用postInvalidate()更新画布。
+
+            // 后台绘制缓冲区
+            mBufferBitmap = Bitmap.createBitmap(mScreenWidth,mScreenHeight,Config.ARGB_8888);  
+            Canvas mCanvas = new Canvas();  
+
+            // 一次性画到屏幕上
+            mCanvas.setBitmap(mBufferBitmap);
+
+
+    - **view**:是最基础的，必须在UI主线程内更新画面，速度较慢。  
+    - **SurfaceView**:是view的子类，类似使用双缓机制，在新的线程中更新画面所以刷新界面速度比view快  
+    - **GLSurfaceView**:是SurfaceView的子类，opengl专用的。管理一块内存，可以被组合进Android的界面系统;管理EGL显示，允许OpenGL渲染;可以自定义渲染器;在单独的线程
+    渲染;提供持续的渲染。总之很适合渲染。
+
 11. Android程序OOM的问题。
-使用DDMS的Heap内存检测工具
-1). Android 单个进程的内存使用分为Dalvik内存和Native内存，单个进程内存上限的原因，APP使用的内存不能无线增长。当使用过多的内存时，必然导致OOM的发生。同时Android系统中规定Bitmap所占的内存不能超过固定的数目，一般是8M。因此过多的Bitmap对象也会导致OOM错误。
-避免这个方式导致的OOM的方法，一个是在Manifest中申明largeHeap属性，增加最大heapsize。
-另外就是注意一些浪费内存的编程习惯。
-a). Bitmap的使用优化。包括及时Recycle，对于大图要Sample，网络下载图片的话，小图使用LRUCache+softReference+sd卡缓存，大图按需下载。
-b). 使用保守的Service，避免Service一直在后台运行。当任务结束时，就停止运行Service。
-c). 谨慎使用外部依赖库
-d). 使用多进程
-2). 由于Android内存泄露导致的OOM
-a. Cursor没有guanbi
-b. 构造Adapter时没有使用缓存的convertView
-c. Bitmap没有recycle()。事实上，Bitmap对象将其引用设为null后，当gc运行时确实会自动回收的。但是gc运行时间是不确定的，而bitmap又非常占内存。因此recycle方法的使用是必要的。
-d. 引用的context对象activity过了生命周期，这里，我们的解决方法是使用weakreference或者是使用ApplicationContext
+    - Android单个进程的内存使用分为Dalvik内存和Native内存，单个进程内存上限的原因，APP使用的内存不能无线增长。当使用过多的内存时，必然导致OOM的发生。同时Android
+    系统中规定Bitmap所占的内存不能超过固定的数目，一般是8M。因此过多的Bitmap对象也会导致OOM错误。避免这个方式导致的OOM的方法，一个是在Manifest中申明largeHeap属性，
+    增加最大heapsize。另外就是注意一些浪费内存的编程习惯。
+    ```
+    a). Bitmap的使用优化。包括及时Recycle，对于大图要Sample，网络下载图片的话，小图使用LRUCache+softReference+sd卡缓存，大图按需下载。
+    b). 使用保守的Service，避免Service一直在后台运行。当任务结束时，就停止运行Service。
+    c). 谨慎使用外部依赖库
+    d). 使用多进程
+    ```
+    - 由于Android内存泄露导致的OOM
+    ```
+    a. Cursor没有guanbi
+    b. 构造Adapter时没有使用缓存的convertView
+    c. Bitmap没有recycle()。事实上，Bitmap对象将其引用设为null后，当gc运行时确实会自动回收的。但是gc运行时间是不确定的，而bitmap又非常占内存。因此recycle方法的使用是
+    必要的。
+    d. 引用的context对象activity过了生命周期，这里，我们的解决方法是使用weakreference或者是使用ApplicationContext
+    ```
+    - Android应用程序的内存使用情况可以使用DDMS的Heap工具查看。
+
+12. Activity中findViewById一定要在onCreate方法中执行，且要在setContentView之后。
+13. ANR和FC是有区别的，ANR在程序的Main线程中进行了耗时操作，程序一时不相应，但不会FC，有可能之后又相应了。耗时操作不等于在主线程访问Internet，这个会直接FC。
+FC就是OOM或RuntimeException发生，程序Force Close。
+14. Thread默认不提供资源池，除非使用线程池ThreadPool管理，而Message和AsyncTask都提供了资源池。
+15. style是对于view和window这一层级的，而theme是对于Activity和Application这一层级的，虽然theme也是一种style，但是 本题就是和你抠字眼了。
+16. 使用SimpleAdapter作为适配器时，支持三种类型的 View，而且是按照如下顺序进行匹配：
+继承Checkable接口
+ TextView
+ ImageView
+
+CompoundButton 声明如下：
+1
+public abstract class CompoundButton extends Button implements Checkable
+可见他是实现了Checkable接口的按钮，因此也在入选范围内。
