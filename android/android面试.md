@@ -156,7 +156,7 @@ final类型的，目的和measure方法一样。layout方法内部会调用`onla
     系统中规定Bitmap所占的内存不能超过固定的数目，一般是8M。因此过多的Bitmap对象也会导致OOM错误。避免这个方式导致的OOM的方法，一个是在Manifest中申明largeHeap属性，
     增加最大heapsize。另外就是注意一些浪费内存的编程习惯。
     ```
-    a). Bitmap的使用优化。包括及时Recycle，对于大图要Sample，网络下载图片的话，小图使用LRUCache+softReference+sd卡缓存，大图按需下载。
+    a). Bitmap的使用优化。包括及时Recycle，对于大图要Sample，网络下载图片的话，小图使用LRUCache+softReference+sd卡缓存，大图按需下载。以及设置先读取尺寸，在设置取样率
     b). 使用保守的Service，避免Service一直在后台运行。当任务结束时，就停止运行Service。
     c). 谨慎使用外部依赖库
     d). 使用多进程
@@ -185,3 +185,16 @@ CompoundButton 声明如下：
 1
 public abstract class CompoundButton extends Button implements Checkable
 可见他是实现了Checkable接口的按钮，因此也在入选范围内。
+
+17. Android assets, res/raw和res/drawable的区别
+    - assets: assets是通过文件路路径和文件名获取资源的。`AssetManager am = getResources().getAssets(); InputStream is = am.open(filename);`
+    assets下的文件不压缩;assets目录下可以建子目录，并且能获得子目录的资源。
+    - raw：不压缩，无法获取子目录资源.`InputStream is = getResources().openRawResources(R.id.xxx);`, `Uri uri = Uri.parse("android.resource://"
+    + getPackageName() + "/" + R.raw.xxx);`
+    - drawable：有损压缩，无法获取子目录资源
+
+18. BitmapFactory.Options
+    - inJustDecodeBounds
+    - inSampleSize: if value > 1, image will be sampled
+
+19. Android杀掉进程时优先级从高到低以此是：前台进程，可视进程，次要服务进程，后台进程，内容提供者节点，空进程
